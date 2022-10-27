@@ -17,16 +17,19 @@ INDEX_ENTRIES = {
     ThumbnailType.WINDOWS_VISTA: 5,
 }
 
+MAX_IMM_OFFSET = 4
+BYTES_IN_NUMBER = 4
+
 
 class ThumbnailIndex:
     _signature = b"IMMM"
 
-    def __init__(self, file: BinaryIO):
+    def __init__(self, file: BinaryIO) -> None:
         self.file = file
         self._header = None
 
     @property
-    def header(self):
+    def header(self) -> Structure:
         if self._header is None:
             self._header = self._find_header(self.file)
         return self._header
@@ -34,7 +37,7 @@ class ThumbnailIndex:
     def _find_header(self, file: BinaryIO) -> Structure:
         """Searches for the header signature, and puts ``file`` at the correct position.
 
-        From windows 8.1 onward, the two fields seem use a 64-bit format field 
+        From windows 8.1 onward, the two fields seem use a 64-bit format field
         inside the header with the value ``0C 00 30 20``.
 
         Args:
@@ -50,14 +53,14 @@ class ThumbnailIndex:
         buffer = file.read(len(c_thumbcache_index.INDEX_HEADER_V1))
         offset = buffer.find(self._signature)
 
-        if offset == 4:
+        if offset == MAX_IMM_OFFSET:
             file.seek(position)
 
             header = c_thumbcache_index.INDEX_HEADER_V2(file)
             # From looking at the index files, it has a specific amount of information
             # depending on the number of index_db files.
             # TODO: see if it does anything interesting, or it might have something to do with the icon_cache.
-            additional_header_bytes = INDEX_ENTRIES.get(header.version) * 8
+            additional_header_bytes = INDEX_ENTRIES.get(header.version) * BYTES_IN_NUMBER
             file.read(additional_header_bytes)
             return header
         elif offset == 0:
@@ -137,7 +140,7 @@ class IndexEntry:
             self._data = c_thumbcache_index.uint32[size](self.file)
             if self.type > ThumbnailType.WINDOWS_7:
                 # Alignment step
-                self.file.read((size % 2) * 4)
+                self.file.read((size % 2) * BYTES_IN_NUMBER)
         return self._data
 
     @property
