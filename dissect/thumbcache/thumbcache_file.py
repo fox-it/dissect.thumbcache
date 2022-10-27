@@ -34,7 +34,7 @@ class ThumbcacheFile:
         self._header = self._get_header_type(self.file)
         self._cached_entries: dict[int, ThumbnailType] = {}
 
-    def _get_header_type(self, file: BinaryIO):
+    def _get_header_type(self, file: BinaryIO) -> Structure:
         tmp_header = c_thumbcache_index.CACHE_HEADER(file)
 
         if tmp_header.version <= ThumbnailType.WINDOWS_7:
@@ -50,7 +50,7 @@ class ThumbcacheFile:
     def version(self) -> ThumbnailType:
         return ThumbnailType(self.header.version)
 
-    def __getitem__(self, key: int):
+    def __getitem__(self, key: int) -> ThumbcacheEntry:
         if key in self._cached_entries:
             return self._cached_entries[key]
 
@@ -117,7 +117,7 @@ class ThumbcacheEntry:
 
         self._data = file.read(self._header.size - header_size)
 
-    def _get_header(self, thumbnail_type: ThumbnailType):
+    def _get_header(self, thumbnail_type: ThumbnailType) -> type[Structure]:
         if thumbnail_type == ThumbnailType.WINDOWS_VISTA:
             return c_thumbcache_index.CACHE_ENTRY_VISTA
         else:
@@ -129,7 +129,7 @@ class ThumbcacheEntry:
 
     @property
     def extension(self) -> str:
-        """This property contains the extension type of the data (Only in VISTA)"""
+        """This property contains the extension type of the data (Only in VISTA)."""
         if self._type == ThumbnailType.WINDOWS_VISTA:
             return self._header.extension.strip("\x00")
         return ""
