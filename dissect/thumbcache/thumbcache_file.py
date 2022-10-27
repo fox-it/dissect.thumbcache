@@ -131,7 +131,7 @@ class ThumbcacheEntry:
     def extension(self) -> str:
         """This property contains the extension type of the data (Only in VISTA)"""
         if self._type == ThumbnailType.WINDOWS_VISTA:
-            return self._header.extension.strip(b"\x00")
+            return self._header.extension.strip("\x00")
         return ""
 
     @property
