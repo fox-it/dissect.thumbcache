@@ -32,10 +32,10 @@ class ThumbnailIndex:
         return self._header
 
     def _find_header(self, file: BinaryIO) -> Structure:
-        """Search for the header signature, and puts ``file`` at the correct position.
+        """Searches for the header signature, and puts ``file`` at the correct position.
 
-        From windows 8.1 onward, the two fields seem use a 64-bit format.
-        field inside the header with the value ``0C 00 30 20``.
+        From windows 8.1 onward, the two fields seem use a 64-bit format field 
+        inside the header with the value ``0C 00 30 20``.
 
         Args:
             file: The file to read the header and indexes from.
@@ -55,7 +55,7 @@ class ThumbnailIndex:
 
             header = c_thumbcache_index.INDEX_HEADER_V2(file)
             # From looking at the index files, it has a specific amount of information
-            # Depending on the number of index_db files.
+            # depending on the number of index_db files.
             # TODO: see if it does anything interesting, or it might have something to do with the icon_cache.
             additional_header_bytes = INDEX_ENTRIES.get(header.version) * 8
             file.read(additional_header_bytes)
@@ -99,12 +99,12 @@ class IndexEntry:
         self._data = None
 
     @property
-    def header(self):
+    def header(self) -> Structure:
         if not self._header:
             self._header = self._select_header()
         return self._header
 
-    def _select_header(self):
+    def _select_header(self) -> Structure:
         """Selects header version according to the thumbnailtype."""
         if self.type == ThumbnailType.WINDOWS_VISTA:
             return c_thumbcache_index.VISTA_ENTRY(self.file)
@@ -126,7 +126,7 @@ class IndexEntry:
 
     @property
     def cache_offsets(self) -> list[int]:
-        """Retrieve the index data entries.
+        """Retrieves the index data entries.
 
         These are offsets into the thumbcache files, where the order specifies in which of the files.
         More information about the order can be found in :class:`Thumbcache`.

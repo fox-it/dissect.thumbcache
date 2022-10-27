@@ -33,7 +33,7 @@ struct WINDOWS7_ENTRY {
 struct WINDOWS8_ENTRY {
     char hash[8];
     uint32 flags;
-    uint32 unknown; // Is sometims filled with information, couldn't figure out what it meant yet though.
+    uint32 unknown; // Is sometimes filled with information, couldn't figure out what it meant yet though.
 }
 
 struct CACHE_HEADER {

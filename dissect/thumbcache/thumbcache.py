@@ -6,7 +6,7 @@ from dissect.thumbcache.thumbcache_file import ThumbcacheEntry, ThumbcacheFile
 
 
 class Thumbcache:
-    """This class combines the thumbnailindex and thumbcachefile together.
+    """This class combines the thumbnailindex and thumbcachefile.
 
     The class looks up all files inside ``path`` that have the same ``prefix``.
 
@@ -48,14 +48,14 @@ class Thumbcache:
             yield from self._entries_from_offsets(entry.cache_offsets)
 
     def index_entries(self) -> Iterator[IndexEntry]:
-        """Iterates through all the index entries that are in use"""
+        """Iterates through all the index entries that are in use."""
         with self.index_file.open("rb") as i_file:
             for entry in ThumbnailIndex(i_file).entries():
                 if entry.in_use():
                     yield entry
 
     def _entries_from_offsets(self, offsets: list[int]) -> Iterator[tuple[Path, ThumbcacheEntry]]:
-        """Retrieve Thumbcache entries from a ThumbcacheFile using offsets."""
+        """Retrieves Thumbcache entries from a ThumbcacheFile using offsets."""
         for idx, offset in enumerate(offsets):
             if offset == 0xFFFFFFFF:
                 continue
