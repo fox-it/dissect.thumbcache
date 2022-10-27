@@ -1,0 +1,10 @@
+name: Dissect CI
+on: [push, pull_request, workflow_dispatch]
+
+jobs: 
+  ci:
+    uses: fox-it/dissect-workflow-templates/.github/workflows/dissect-ci-template.yml@main
+    with:
+      run_tests: false
+      on-demand-test: 'dissect.target'
+    secrets: inherit
