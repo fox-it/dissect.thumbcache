@@ -8,6 +8,8 @@ from dissect.thumbcache.c_thumbcache import c_thumbcache_index
 from dissect.thumbcache.exceptions import InvalidSignatureError
 from dissect.thumbcache.util import ThumbnailType, seek_and_return
 
+UNKNOWN_BYTES = 8
+
 
 class ThumbcacheFile:
     __slots__ = [
@@ -105,8 +107,8 @@ class ThumbcacheEntry:
         if type > ThumbnailType.WINDOWS_7:
             # There are some additional unknown bytes before the header continues,
             # I do not know what kind of information it contains
-            file.read(8)
-            additional_bytes += 8
+            file.read(UNKNOWN_BYTES)
+            additional_bytes += UNKNOWN_BYTES
 
         self.data_checksum: bytes = c_thumbcache_index.char[8](file)
         self.header_checksum: bytes = c_thumbcache_index.char[8](file)

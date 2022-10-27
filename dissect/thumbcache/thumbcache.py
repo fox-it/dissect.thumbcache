@@ -15,7 +15,7 @@ class Thumbcache:
         prefix: The start of the name to search for.
     """
 
-    def __init__(self, path: Path, prefix="thumbcache") -> None:
+    def __init__(self, path: Path, prefix: str = "thumbcache") -> None:
         self._mapping: dict[str, Path] = {}
         self.index_file, self.cache_files = self._populate_files(path, prefix)
 
