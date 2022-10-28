@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from dissect.thumbcache.exceptions import Error
 from dissect.thumbcache.thumbcache import Thumbcache
 from dissect.thumbcache.tools.utils import create_argument_parser, write_entry
 
@@ -7,9 +8,12 @@ from dissect.thumbcache.tools.utils import create_argument_parser, write_entry
 def dump_entry_data_through_index(path: Path, output_dir: Path, prefix: str):
 
     cache = Thumbcache(path=path, prefix=prefix)
-    for location_path, entry in cache.entries():
-        file_name = location_path.stem.split("_", 1)[1]
-        write_entry(output_dir, entry, file_name)
+    try:
+        for location_path, entry in cache.entries():
+            file_name = location_path.stem.split("_", 1)[1]
+            write_entry(output_dir, entry, file_name)
+    except Error as e:
+        print(e)
 
 
 def main():

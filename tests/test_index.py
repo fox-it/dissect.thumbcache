@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from dissect.thumbcache.exceptions import NotAThumbnailIndexFileError
+from dissect.thumbcache.exceptions import NotAnIndexFileError
 from dissect.thumbcache.index import IndexEntry, ThumbnailIndex, ThumbnailType
 
 
@@ -34,7 +34,7 @@ def test_index_type(
 
 
 def test_index_unknown():
-    with pytest.raises(NotAThumbnailIndexFileError):
+    with pytest.raises(NotAnIndexFileError):
         index = ThumbnailIndex(io.BytesIO(b"UNKNOWN_DATA"))
         index.header
 

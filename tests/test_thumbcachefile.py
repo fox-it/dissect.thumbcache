@@ -2,7 +2,11 @@ from pathlib import Path
 
 import pytest
 
-from dissect.thumbcache.exceptions import InvalidSignatureError
+from dissect.thumbcache.c_thumbcache import c_thumbcache_index
+from dissect.thumbcache.exceptions import (
+    InvalidSignatureError,
+    UnknownThumbnailTypeError,
+)
 from dissect.thumbcache.thumbcache_file import ThumbcacheFile
 from dissect.thumbcache.util import ThumbnailType
 
@@ -28,6 +32,18 @@ def test_thumbcache_version(thumbcache_file: ThumbcacheFile, thumbnail_type: Thu
 
     assert thumbcache_file.version == thumbnail_type
     assert thumbcache_file.signature == b"CMMM"
+
+
+def test_thumbcache_file_failed():
+    with pytest.raises(InvalidSignatureError):
+        ThumbcacheFile(b"UNKNOWN" + b"\x00" * 20)
+
+
+def test_unknown_thumbnail_type():
+    with pytest.raises(UnknownThumbnailTypeError):
+        header = c_thumbcache_index.CACHE_HEADER(signature=b"CMMM", version=0xDEADBEEF)
+        cache_file = ThumbcacheFile(header.dumps())
+        cache_file.version
 
 
 @pytest.mark.parametrize(

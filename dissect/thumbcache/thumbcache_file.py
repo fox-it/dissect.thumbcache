@@ -5,7 +5,10 @@ from typing import Any, BinaryIO
 from dissect.cstruct import Structure
 
 from dissect.thumbcache.c_thumbcache import c_thumbcache_index
-from dissect.thumbcache.exceptions import InvalidSignatureError
+from dissect.thumbcache.exceptions import (
+    InvalidSignatureError,
+    UnknownThumbnailTypeError,
+)
 from dissect.thumbcache.util import ThumbnailType, seek_and_return
 
 UNKNOWN_BYTES = 8
@@ -31,13 +34,20 @@ class ThumbcacheFile:
         file: A file-like object.
     """
 
+    _signature = b"CMMM"
+
     def __init__(self, file: BinaryIO) -> None:
         self.file = file
         self._header = self._get_header_type(self.file)
-        self._cached_entries: dict[int, ThumbnailType] = {}
+        self._cached_entries: dict[int, ThumbcacheEntry] = {}
 
     def _get_header_type(self, file: BinaryIO) -> Structure:
         tmp_header = c_thumbcache_index.CACHE_HEADER(file)
+
+        if self._signature != tmp_header.signature:
+            raise InvalidSignatureError(
+                f"The signature {tmp_header.signature!r} does not match the expected {self._signature!r}"
+            )
 
         if tmp_header.version <= ThumbnailType.WINDOWS_7:
             return c_thumbcache_index.CACHE_HEADER_VISTA(tmp_header.dumps())
@@ -50,7 +60,10 @@ class ThumbcacheFile:
 
     @property
     def version(self) -> ThumbnailType:
-        return ThumbnailType(self.header.version)
+        try:
+            return ThumbnailType(self.header.version)
+        except ValueError:
+            raise UnknownThumbnailTypeError(f"{self.header.version} is not known.")
 
     def __getitem__(self, key: int) -> ThumbcacheEntry:
         if key in self._cached_entries:
@@ -101,7 +114,9 @@ class ThumbcacheEntry:
         self._header = self._get_header(type)(file)
 
         if self._header.signature != self._signature:
-            raise InvalidSignatureError("The entry did not have a proper signature.")
+            raise InvalidSignatureError(
+                f"The signature {self._header.signature!r} does not match the expected {self._signature}."
+            )
 
         additional_bytes = self._checksum_lengths
         if type > ThumbnailType.WINDOWS_7:

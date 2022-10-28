@@ -7,7 +7,7 @@ from dissect.cstruct import Structure
 from dissect.util import ts
 
 from dissect.thumbcache.c_thumbcache import c_thumbcache_index
-from dissect.thumbcache.exceptions import NotAThumbnailIndexFileError
+from dissect.thumbcache.exceptions import NotAnIndexFileError
 from dissect.thumbcache.util import ThumbnailType
 
 INDEX_ENTRIES = {
@@ -66,7 +66,9 @@ class ThumbnailIndex:
         elif offset == 0:
             return c_thumbcache_index.INDEX_HEADER_V1(buffer)
         else:
-            raise NotAThumbnailIndexFileError()
+            raise NotAnIndexFileError(
+                f"The index file signature {self._signature!r} could not be found at the expected location."
+            )
 
     @property
     def version(self) -> int:
