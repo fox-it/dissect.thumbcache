@@ -58,11 +58,23 @@ class ThumbnailIndex:
             file.seek(position)
 
             header = c_thumbcache_index.INDEX_HEADER_V2(file)
-            # From looking at the index files, it has a specific amount of information
-            # depending on the number of index_db files.
-            # TODO: see if it does anything interesting, or it might have something to do with the icon_cache.
-            additional_header_bytes = INDEX_ENTRIES.get(header.version) * BYTES_IN_NUMBER
-            file.read(additional_header_bytes)
+            # From looking at the index files, it has a specific amount of information.
+            # It is alligned in the follwing way:
+            #   INDEX_HEADER_V2
+            #   length of an INDEX_ENTRY of a specific type including the cache_offsets
+            # After that point, there are only zero bytes, which seem to have the following relation:
+            #   length of the same INDEX_ENTRY - length of the length of INDEX_HEADER_V2
+            #
+            # TODO: see if it the data contains any useful information.
+
+            # Read one index entry from the file till only zero bytes
+            entry = IndexEntry(file, header.version)
+            entry.header
+            entry.cache_offsets
+
+            # Read offset to first entry
+            zero_bytes = len(entry.header) + INDEX_ENTRIES.get(header.version) * BYTES_IN_NUMBER - len(header)
+            file.read(zero_bytes)
             return header
         elif offset == 0:
             return c_thumbcache_index.INDEX_HEADER_V1(buffer)
