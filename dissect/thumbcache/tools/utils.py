@@ -1,15 +1,15 @@
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 from pathlib import Path
 
 from dissect.thumbcache.thumbcache import ThumbcacheEntry
 
 
-def create_argument_parser(name: str) -> Namespace:
+def create_argument_parser(name: str) -> ArgumentParser():
     parser = ArgumentParser(name)
     parser.add_argument("cache_path", type=Path)
     parser.add_argument("--output-dir", "-o", type=Path, default=Path("."))
 
-    return parser.parse_args()
+    return parser
 
 
 def write_entry(output_path: Path, entry: ThumbcacheEntry, file_prefix: str):

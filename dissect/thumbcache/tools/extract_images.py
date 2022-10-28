@@ -15,8 +15,12 @@ def dump_entry_data(path: Path, output_dir: Path):
 
 
 def main():
-    args = create_argument_parser("extract raw thumbcache entries")
+    args = create_argument_parser("extract raw thumbcache entries").parse_args()
     path: Path = args.cache_path
+
+    if path.name.endswith("idx.db"):
+        print("Please provide a file other than the idx file.")
+        exit(1)
 
     if path.is_dir():
         for file in path.iterdir():

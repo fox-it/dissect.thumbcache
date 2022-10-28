@@ -4,21 +4,32 @@ from dissect.thumbcache.thumbcache import Thumbcache
 from dissect.thumbcache.tools.utils import create_argument_parser, write_entry
 
 
-def dump_entry_data_through_index(path: Path, output_dir: Path):
+def dump_entry_data_through_index(path: Path, output_dir: Path, prefix: str):
 
-    cache = Thumbcache(path)
+    cache = Thumbcache(path=path, prefix=prefix)
     for location_path, entry in cache.entries():
         file_name = location_path.stem.split("_", 1)[1]
         write_entry(output_dir, entry, file_name)
 
 
 def main():
-    args = create_argument_parser("extract indexed entries")
+    parser = create_argument_parser("extract indexed entries")
+    parser.add_argument(
+        "--prefix",
+        "-p",
+        type=str,
+        default="thumbcache",
+        help="The file prefix to search for inside the thumbcache directory.",
+    )
+
+    args = parser.parse_args()
 
     path: Path = args.cache_path
 
     if path.is_dir():
-        dump_entry_data_through_index(path, args.output_dir)
+        dump_entry_data_through_index(path, args.output_dir, args.prefix)
+    else:
+        print("Please provide the thumbnail cache directory.")
 
 
 if __name__ == "__main__":
