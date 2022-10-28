@@ -50,7 +50,7 @@ def test_thumbcache_entries(thumbcache_file: ThumbcacheFile, entries: int, size:
     [("windows_7/thumbcache_256.db")],
 )
 def test_thumbcache_get_entry(thumbcache_file: ThumbcacheFile):
-    thumbcache_file[0x18].hash == "e84eb8f951bc2409"
+    assert thumbcache_file[0x18].hash == "e84eb8f951bc2409"
 
 
 @pytest.mark.parametrize(
