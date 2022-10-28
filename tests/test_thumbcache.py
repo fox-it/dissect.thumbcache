@@ -6,7 +6,7 @@ from dissect.thumbcache.thumbcache import Thumbcache
 
 
 @pytest.fixture
-def thumbcache(path: str):
+def thumbcache(path: str) -> Thumbcache:
     file = Path(__file__).parent / path
     return Thumbcache(file)
 

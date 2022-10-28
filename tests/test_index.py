@@ -25,7 +25,7 @@ def test_index():
 def test_index_type(
     path: Path,
     expected_type: ThumbnailType,
-) -> None:
+):
     index_path = Path(__file__).parent / path
 
     with index_path.open("rb") as ifile:
