@@ -19,6 +19,7 @@ INDEX_ENTRIES = {
 
 MAX_IMM_OFFSET = 4
 BYTES_IN_NUMBER = 4
+IDENTIFIER_BYTES = 8
 
 
 class ThumbnailIndex:
@@ -93,7 +94,8 @@ class ThumbnailIndex:
             entry.header
             entry.cache_offsets
 
-            yield entry
+            if entry.in_use():
+                yield entry
 
 
 class IndexEntry:
@@ -119,7 +121,7 @@ class IndexEntry:
             return c_thumbcache_index.WINDOWS8_ENTRY(self.file)
 
     def in_use(self) -> bool:
-        return self.identifier != b"\x00" * 8
+        return self.identifier != b"\x00" * IDENTIFIER_BYTES
 
     @property
     def identifier(self) -> bytes:

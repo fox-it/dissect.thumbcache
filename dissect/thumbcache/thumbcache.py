@@ -51,8 +51,7 @@ class Thumbcache:
         """Iterates through all the index entries that are in use."""
         with self.index_file.open("rb") as i_file:
             for entry in ThumbnailIndex(i_file).entries():
-                if entry.in_use():
-                    yield entry
+                yield entry
 
     def _entries_from_offsets(self, offsets: list[int]) -> Iterator[tuple[Path, ThumbcacheEntry]]:
         """Retrieves Thumbcache entries from a ThumbcacheFile using offsets."""
