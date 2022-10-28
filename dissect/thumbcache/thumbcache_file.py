@@ -31,18 +31,18 @@ class ThumbcacheFile:
     thumbcache_*.db. Which is is different from the thumbcache_idx.db.
 
     Args:
-        file: A file-like object.
+        fh: A file-like object.
     """
 
     _signature = b"CMMM"
 
-    def __init__(self, file: BinaryIO) -> None:
-        self.file = file
-        self._header = self._get_header_type(self.file)
+    def __init__(self, fh: BinaryIO) -> None:
+        self.fh = fh
+        self._header = self._get_header_type(self.fh)
         self._cached_entries: dict[int, ThumbcacheEntry] = {}
 
-    def _get_header_type(self, file: BinaryIO) -> Structure:
-        tmp_header = c_thumbcache_index.CACHE_HEADER(file)
+    def _get_header_type(self, fh: BinaryIO) -> Structure:
+        tmp_header = c_thumbcache_index.CACHE_HEADER(fh)
 
         if self._signature != tmp_header.signature:
             raise InvalidSignatureError(
@@ -69,7 +69,7 @@ class ThumbcacheFile:
         if key in self._cached_entries:
             return self._cached_entries[key]
 
-        with seek_and_return(self.file, key) as file:
+        with seek_and_return(self.fh, key) as file:
             item = ThumbcacheEntry(file, self.version)
         self._cached_entries[key] = item
         return item
@@ -83,10 +83,10 @@ class ThumbcacheFile:
         return getattr(self.header, __name)
 
     def entries(self) -> list[ThumbcacheEntry]:
-        with seek_and_return(self.file, self.file.tell()):
+        with seek_and_return(self.fh, self.fh.tell()):
             try:
                 while True:
-                    yield ThumbcacheEntry(self.file, self.version)
+                    yield ThumbcacheEntry(self.fh, self.version)
             except EOFError:
                 pass
 
@@ -100,7 +100,7 @@ class ThumbcacheEntry:
     At least for Windows 7: http://www.swiftforensics.com/2012/06/windows-7-thumbcache-hash-algorithm.html
 
     Args:
-        file: A reference to binary data, where we can read from.
+        fh: A reference to binary data, where we can read from.
         type: The type of system that generated the entry.
 
     Raises:
@@ -109,9 +109,9 @@ class ThumbcacheEntry:
 
     _checksum_lengths = 0x10
 
-    def __init__(self, file: BinaryIO, type: ThumbnailType) -> None:
+    def __init__(self, fh: BinaryIO, type: ThumbnailType) -> None:
         self._type = type
-        self._header = self._get_header(type)(file)
+        self._header = self._get_header(type)(fh)
 
         if self._header.signature != self._signature:
             raise InvalidSignatureError(
@@ -122,17 +122,17 @@ class ThumbcacheEntry:
         if type > ThumbnailType.WINDOWS_7:
             # There are some additional unknown bytes before the header continues,
             # I do not know what kind of information it contains
-            file.read(UNKNOWN_BYTES)
+            fh.read(UNKNOWN_BYTES)
             additional_bytes += UNKNOWN_BYTES
 
-        self.data_checksum: bytes = c_thumbcache_index.char[8](file)
-        self.header_checksum: bytes = c_thumbcache_index.char[8](file)
+        self.data_checksum: bytes = c_thumbcache_index.char[8](fh)
+        self.header_checksum: bytes = c_thumbcache_index.char[8](fh)
 
-        self.identifier: str = c_thumbcache_index.wchar[self._header.identifier_size // 2](file)
+        self.identifier: str = c_thumbcache_index.wchar[self._header.identifier_size // 2](fh)
 
         header_size = len(self._header) + self._header.identifier_size + additional_bytes
 
-        self._data = file.read(self._header.size - header_size)
+        self._data = fh.read(self._header.size - header_size)
 
     def _get_header(self, thumbnail_type: ThumbnailType) -> type[Structure]:
         if thumbnail_type == ThumbnailType.WINDOWS_VISTA:

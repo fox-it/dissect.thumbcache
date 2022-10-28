@@ -25,24 +25,24 @@ IDENTIFIER_BYTES = 8
 class ThumbnailIndex:
     _signature = b"IMMM"
 
-    def __init__(self, file: BinaryIO) -> None:
-        self.file = file
+    def __init__(self, fh: BinaryIO) -> None:
+        self.fh = fh
         self._header = None
 
     @property
     def header(self) -> Structure:
         if self._header is None:
-            self._header = self._find_header(self.file)
+            self._header = self._find_header(self.fh)
         return self._header
 
-    def _find_header(self, file: BinaryIO) -> Structure:
-        """Searches for the header signature, and puts ``file`` at the correct position.
+    def _find_header(self, fh: BinaryIO) -> Structure:
+        """Searches for the header signature, and puts ``fh`` at the correct position.
 
         From Windows 8.1 onward, the two fields seem to use a 64-bit format field
         inside the header with the value ``0C 00 30 20``.
 
         Args:
-            file: The file to read the header and indexes from.
+            fh: The file to read the header and indexes from.
 
         Returns:
             A c_thumbcache_index.INDEX_HEADER structure.
@@ -50,14 +50,14 @@ class ThumbnailIndex:
         Raises:
             NotAThumbnailIndexFileError: If the ``IMMM`` signature could not be found.
         """
-        position = file.tell()
-        buffer = file.read(len(c_thumbcache_index.INDEX_HEADER_V1))
+        position = fh.tell()
+        buffer = fh.read(len(c_thumbcache_index.INDEX_HEADER_V1))
         offset = buffer.find(self._signature)
 
         if offset == MAX_IMM_OFFSET:
-            file.seek(position)
+            fh.seek(position)
 
-            header = c_thumbcache_index.INDEX_HEADER_V2(file)
+            header = c_thumbcache_index.INDEX_HEADER_V2(fh)
             # From looking at the index files, it has a specific amount of information.
             # It is alligned in the follwing way:
             #   INDEX_HEADER_V2
@@ -68,13 +68,13 @@ class ThumbnailIndex:
             # TODO: see if it the data contains any useful information.
 
             # Read one index entry from the file till only zero bytes
-            entry = IndexEntry(file, header.version)
+            entry = IndexEntry(fh, header.version)
             entry.header
             entry.cache_offsets
 
             # Read offset to first entry
             zero_bytes = len(entry.header) + INDEX_ENTRIES.get(header.version) * BYTES_IN_NUMBER - len(header)
-            file.read(zero_bytes)
+            fh.read(zero_bytes)
             return header
         elif offset == 0:
             return c_thumbcache_index.INDEX_HEADER_V1(buffer)
@@ -102,7 +102,7 @@ class ThumbnailIndex:
     def entries(self) -> Iterator[IndexEntry]:
         """Returns all index entries that are actually used."""
         for _ in range(self.total_entries):
-            entry = IndexEntry(self.file, self.type)
+            entry = IndexEntry(self.fh, self.type)
             entry.header
             entry.cache_offsets
 
@@ -111,7 +111,7 @@ class ThumbnailIndex:
 
 
 class IndexEntry:
-    def __init__(self, file: BinaryIO, type: ThumbnailType) -> None:
+    def __init__(self, fh: BinaryIO, type: ThumbnailType) -> None:
         self.fh = fh
         self.type = type
         self._header = None
@@ -126,11 +126,11 @@ class IndexEntry:
     def _select_header(self) -> Structure:
         """Selects header version according to the thumbnailtype."""
         if self.type == ThumbnailType.WINDOWS_VISTA:
-            return c_thumbcache_index.VISTA_ENTRY(self.file)
+            return c_thumbcache_index.VISTA_ENTRY(self.fh)
         elif self.type == ThumbnailType.WINDOWS_7:
-            return c_thumbcache_index.WINDOWS7_ENTRY(self.file)
+            return c_thumbcache_index.WINDOWS7_ENTRY(self.fh)
         else:
-            return c_thumbcache_index.WINDOWS8_ENTRY(self.file)
+            return c_thumbcache_index.WINDOWS8_ENTRY(self.fh)
 
     def in_use(self) -> bool:
         return self.identifier != b"\x00" * IDENTIFIER_BYTES
@@ -153,10 +153,10 @@ class IndexEntry:
         """
         if not self._data:
             size = INDEX_ENTRIES.get(self.type)
-            self._data = c_thumbcache_index.uint32[size](self.file)
+            self._data = c_thumbcache_index.uint32[size](self.fh)
             if self.type > ThumbnailType.WINDOWS_7:
                 # Alignment step
-                self.file.read((size % 2) * BYTES_IN_NUMBER)
+                self.fh.read((size % 2) * BYTES_IN_NUMBER)
         return self._data
 
     @property

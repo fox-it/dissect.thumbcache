@@ -11,10 +11,10 @@ class ThumbnailType(enum.IntEnum):
 
 
 @contextmanager
-def seek_and_return(file: BinaryIO, position: int) -> BinaryIO:
-    current_position = file.tell()
+def seek_and_return(fh: BinaryIO, position: int) -> BinaryIO:
+    current_position = fh.tell()
     try:
-        file.seek(position)
-        yield file
+        fh.seek(position)
+        yield fh
     finally:
-        file.seek(current_position)
+        fh.seek(current_position)
