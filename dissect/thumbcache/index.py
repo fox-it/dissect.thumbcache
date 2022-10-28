@@ -111,8 +111,8 @@ class ThumbnailIndex:
 
 
 class IndexEntry:
-    def __init__(self, file: BinaryIO, type: ThumbnailType, data=[]) -> None:
-        self.file = file
+    def __init__(self, file: BinaryIO, type: ThumbnailType) -> None:
+        self.fh = fh
         self.type = type
         self._header = None
         self._data = None
