@@ -34,7 +34,7 @@ struct WINDOWS8_ENTRY {
     char hash[8];
     uint32 flags;
     uint32 unknown; // Is sometimes filled with information, couldn't figure out what it meant yet though.
-}
+};
 
 struct CACHE_HEADER {
     char   signature[4];
@@ -43,7 +43,7 @@ struct CACHE_HEADER {
     uint32 size;
     uint32 offset;
     uint32 entries;
-}
+};
 
 struct CACHE_HEADER_VISTA {
     char   signature[4];
@@ -52,7 +52,7 @@ struct CACHE_HEADER_VISTA {
     uint32 offset;
     uint32 size;
     uint32 entries;
-}
+};
 
 struct CACHE_ENTRY {
     char   signature[4];
@@ -62,7 +62,7 @@ struct CACHE_ENTRY {
     uint32 padding_size;
     uint32 data_size;
     uint32 _unknown3;
-}
+};
 
 struct CACHE_ENTRY_VISTA {
     char   signature[4];
@@ -73,7 +73,7 @@ struct CACHE_ENTRY_VISTA {
     uint32 padding_size;
     uint32 data_size;
     uint32 _unknown3;
-}
+};
 """
 c_thumbcache_index = cstruct()
 c_thumbcache_index.load(c_thumbcache_index_def)

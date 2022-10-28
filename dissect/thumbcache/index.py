@@ -38,7 +38,7 @@ class ThumbnailIndex:
     def _find_header(self, file: BinaryIO) -> Structure:
         """Searches for the header signature, and puts ``file`` at the correct position.
 
-        From windows 8.1 onward, the two fields seem use a 64-bit format field
+        From Windows 8.1 onward, the two fields seem to use a 64-bit format field
         inside the header with the value ``0C 00 30 20``.
 
         Args:

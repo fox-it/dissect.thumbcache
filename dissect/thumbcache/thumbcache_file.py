@@ -97,7 +97,7 @@ class ThumbcacheEntry:
     """ThumbcacheEntry represents an entry inside the thumbcache file.
 
     A cache entry contains a hash that is constructed from GUID, NTFS FILEID, the extention and last modified time.
-    At least for windows 7: http://www.swiftforensics.com/2012/06/windows-7-thumbcache-hash-algorithm.html
+    At least for Windows 7: http://www.swiftforensics.com/2012/06/windows-7-thumbcache-hash-algorithm.html
 
     Args:
         file: A reference to binary data, where we can read from.

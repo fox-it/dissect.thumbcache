@@ -1,15 +1,15 @@
 # dissect.thumbcache
 
-A dissect module implementing parsers for the Thumbcache of windows system.
-This is commonly used to see wich pictures or icons were opened on a system.
+A Dissect module implementing parsers for the thumbcache of Windows systems.
+This is commonly used to see which files were opened on a system.
 
-## Windows vista+
+## Windows Vista+
 
-The project currently only supports the windows vista+ indexed thumbcache. The windows xp format is currently not implemented.
+The project currently only supports the Windows Vista+ indexed thumbcache. The Windows XP format is currently not implemented.
 
 ## Installation
 
-`dissect.thumbcache` is available on [PyPI](https://pypi.org/project/dissect.dissect/).
+`dissect.thumbcache` is available on [PyPI](https://pypi.org/project/dissect.thumbcache/).
 
 ```bash
 pip install dissect.thumbcache
