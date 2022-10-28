@@ -47,14 +47,14 @@ def test_index_entry():
 @pytest.mark.parametrize(
     "path",
     [
-        Path("data/windows_11/thumbcache_idx.db"),
-        Path("data/windows_81/thumbcache_idx.db"),
-        Path("data/windows_10/thumbcache_idx.db"),
-        Path("data/windows_7/thumbcache_idx.db"),
-        Path("data/windows_vista/thumbcache_idx.db"),
+        "data/windows_11/thumbcache_idx.db",
+        "data/windows_81/thumbcache_idx.db",
+        "data/windows_10/thumbcache_idx.db",
+        "data/windows_7/thumbcache_idx.db",
+        "data/windows_vista/thumbcache_idx.db",
     ],
 )
-def test_get_index_entries(path: Path):
+def test_get_index_entries(path: str):
     idx_file = Path(__file__).parent / path
     with idx_file.open("rb") as index_file:
         index = ThumbnailIndex(index_file)
