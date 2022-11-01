@@ -68,12 +68,12 @@ class ThumbnailIndex:
             # TODO: see if it the data contains any useful information.
 
             # Read one index entry from the file till only zero bytes
-            entry = IndexEntry(fh, header.version)
+            entry = IndexEntry(fh, header.Version)
             entry.header
             entry.cache_offsets
 
             # Read offset to first entry
-            zero_bytes = len(entry.header) + INDEX_ENTRIES.get(header.version) * BYTES_IN_NUMBER - len(header)
+            zero_bytes = len(entry.header) + INDEX_ENTRIES.get(header.Version) * BYTES_IN_NUMBER - len(header)
             fh.read(zero_bytes)
             return header
         elif offset == 0:
@@ -85,7 +85,7 @@ class ThumbnailIndex:
 
     @property
     def version(self) -> int:
-        return self.header.version
+        return self.header.Version
 
     @property
     def type(self) -> ThumbnailType:
@@ -93,11 +93,11 @@ class ThumbnailIndex:
 
     @property
     def total_entries(self) -> int:
-        return self.header.total_entries
+        return self.header.TotalEntries
 
     @property
     def used_entries(self) -> int:
-        return self.header.used_entries
+        return self.header.UsedEntries
 
     def entries(self) -> Iterator[IndexEntry]:
         """Returns all index entries that are actually used."""
@@ -137,11 +137,11 @@ class IndexEntry:
 
     @property
     def identifier(self) -> bytes:
-        return self.header.hash
+        return self.header.Hash
 
     @property
     def flags(self) -> int:
-        return self.header.flags
+        return self.header.Flags
 
     @property
     def cache_offsets(self) -> list[int]:
@@ -162,7 +162,7 @@ class IndexEntry:
     @property
     def last_modified(self) -> datetime:
         if self.type == ThumbnailType.WINDOWS_VISTA:
-            return ts.wintimestamp(self._header.last_modified)
+            return ts.wintimestamp(self._header.LastModified)
         return None
 
     def __repr__(self) -> str:

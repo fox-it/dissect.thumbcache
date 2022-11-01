@@ -9,7 +9,7 @@ from dissect.thumbcache.index import IndexEntry, ThumbnailIndex, ThumbnailType
 
 
 def test_index():
-    ThumbnailIndex(file=Mock)
+    ThumbnailIndex(fh=Mock)
 
 
 @pytest.mark.parametrize(

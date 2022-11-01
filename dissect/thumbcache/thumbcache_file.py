@@ -16,7 +16,7 @@ UNKNOWN_BYTES = 8
 
 class ThumbcacheFile:
     __slots__ = [
-        "file",
+        "fh",
         "_header",
         "signature",
         "type",
@@ -44,12 +44,12 @@ class ThumbcacheFile:
     def _get_header_type(self, fh: BinaryIO) -> Structure:
         tmp_header = c_thumbcache_index.CACHE_HEADER(fh)
 
-        if self._signature != tmp_header.signature:
+        if self._signature != tmp_header.Signature:
             raise InvalidSignatureError(
-                f"The signature {tmp_header.signature!r} does not match the expected {self._signature!r}"
+                f"The signature {tmp_header.Signature!r} does not match the expected {self._signature!r}"
             )
 
-        if tmp_header.version <= ThumbnailType.WINDOWS_7:
+        if tmp_header.Version <= ThumbnailType.WINDOWS_7:
             return c_thumbcache_index.CACHE_HEADER_VISTA(tmp_header.dumps())
         else:
             return tmp_header
@@ -61,9 +61,9 @@ class ThumbcacheFile:
     @property
     def version(self) -> ThumbnailType:
         try:
-            return ThumbnailType(self.header.version)
+            return ThumbnailType(self.header.Version)
         except ValueError:
-            raise UnknownThumbnailTypeError(f"{self.header.version} is not known.")
+            raise UnknownThumbnailTypeError(f"{self.header.Version} is not known.")
 
     def __getitem__(self, key: int) -> ThumbcacheEntry:
         if key in self._cached_entries:
@@ -80,7 +80,7 @@ class ThumbcacheFile:
         except AttributeError:
             pass
 
-        return getattr(self.header, __name)
+        return getattr(self.header, __name.capitalize())
 
     def entries(self) -> list[ThumbcacheEntry]:
         with seek_and_return(self.fh, self.fh.tell()):
@@ -113,9 +113,9 @@ class ThumbcacheEntry:
         self._type = type
         self._header = self._get_header(type)(fh)
 
-        if self._header.signature != self._signature:
+        if self._header.Signature != self._signature:
             raise InvalidSignatureError(
-                f"The signature {self._header.signature!r} does not match the expected {self._signature}."
+                f"The signature {self._header.Signature!r} does not match the expected {self._signature}."
             )
 
         additional_bytes = self._checksum_lengths
@@ -128,11 +128,11 @@ class ThumbcacheEntry:
         self.data_checksum: bytes = c_thumbcache_index.char[8](fh)
         self.header_checksum: bytes = c_thumbcache_index.char[8](fh)
 
-        self.identifier: str = c_thumbcache_index.wchar[self._header.identifier_size // 2](fh)
+        self.identifier: str = c_thumbcache_index.wchar[self._header.IdentifierSize // 2](fh)
 
-        header_size = len(self._header) + self._header.identifier_size + additional_bytes
+        header_size = len(self._header) + self._header.IdentifierSize + additional_bytes
 
-        self._data = fh.read(self._header.size - header_size)
+        self._data = fh.read(self._header.Size - header_size)
 
     def _get_header(self, thumbnail_type: ThumbnailType) -> type[Structure]:
         if thumbnail_type == ThumbnailType.WINDOWS_VISTA:
@@ -142,18 +142,18 @@ class ThumbcacheEntry:
 
     @property
     def hash(self) -> str:
-        return self._header.hash.hex()
+        return self._header.Hash.hex()
 
     @property
     def extension(self) -> str:
         """This property contains the extension type of the data (Only in VISTA)."""
         if self._type == ThumbnailType.WINDOWS_VISTA:
-            return self._header.extension.strip("\x00")
+            return self._header.Extension.strip("\x00")
         return ""
 
     @property
     def data(self) -> bytes:
-        return self._data[self._header.padding_size :]
+        return self._data[self._header.PaddingSize :]
 
     def __repr__(self):
         return f"{self.hash=} {self.data_checksum=} {self.header_checksum=} {self.identifier=}"

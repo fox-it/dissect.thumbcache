@@ -41,7 +41,7 @@ def test_thumbcache_file_failed():
 
 def test_unknown_thumbnail_type():
     with pytest.raises(UnknownThumbnailTypeError):
-        header = c_thumbcache_index.CACHE_HEADER(signature=b"CMMM", version=0xDEADBEEF)
+        header = c_thumbcache_index.CACHE_HEADER(Signature=b"CMMM", Version=0xDEADBEEF)
         cache_file = ThumbcacheFile(header.dumps())
         cache_file.version
 
