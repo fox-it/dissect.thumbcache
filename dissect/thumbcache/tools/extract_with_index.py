@@ -33,7 +33,7 @@ def main():
     if path.is_dir():
         dump_entry_data_through_index(path, args.output_dir, args.prefix)
     else:
-        print("Please provide the thumbnail cache directory.")
+        parser.exit("Please provide the thumbnail cache directory.")
 
 
 if __name__ == "__main__":
