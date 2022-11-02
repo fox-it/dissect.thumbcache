@@ -3,6 +3,8 @@
 A Dissect module implementing parsers for the thumbcache of Windows systems.
 This is commonly used to see which files were opened on a system.
 
+For more information, please see [the documentation](https://docs.dissect.tools/en/latest/projects/dissect.thumbcache/index.html).
+
 ## Windows Vista+
 
 The project currently only supports the Windows Vista+ indexed thumbcache. The Windows XP format is currently not implemented.
