@@ -6,7 +6,6 @@ from dissect.thumbcache.tools.utils import create_argument_parser, write_entry
 
 
 def dump_entry_data_through_index(path: Path, output_dir: Path, prefix: str):
-
     cache = Thumbcache(path=path, prefix=prefix)
     try:
         for location_path, entry in cache.entries():

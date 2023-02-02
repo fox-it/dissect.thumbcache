@@ -29,7 +29,6 @@ def thumbcache_file(path: str) -> ThumbcacheFile:
     ],
 )
 def test_thumbcache_version(thumbcache_file: ThumbcacheFile, thumbnail_type: ThumbnailType):
-
     assert thumbcache_file.version == thumbnail_type
     assert thumbcache_file.signature == b"CMMM"
 
