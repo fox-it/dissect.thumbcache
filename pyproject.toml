@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dissect.thumbcache"
+description = "A Dissect module implementing parsers for the thumbcache of Windows systems."
 readme = "README.md"
 requires-python = "~=3.9"
 license.text = "Affero General Public License v3"
