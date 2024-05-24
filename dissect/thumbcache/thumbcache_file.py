@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Any, BinaryIO
 
-from dissect.cstruct import Structure
-
 from dissect.thumbcache.c_thumbcache import c_thumbcache_index
 from dissect.thumbcache.exceptions import (
     InvalidSignatureError,
@@ -41,7 +39,7 @@ class ThumbcacheFile:
         self._header = self._get_header_type(self.fh)
         self._cached_entries: dict[int, ThumbcacheEntry] = {}
 
-    def _get_header_type(self, fh: BinaryIO) -> Structure:
+    def _get_header_type(self, fh: BinaryIO) -> c_thumbcache_index.CACHE_HEADER_VISTA | c_thumbcache_index.CACHE_HEADER:
         tmp_header = c_thumbcache_index.CACHE_HEADER(fh)
 
         if self._signature != tmp_header.Signature:
@@ -55,7 +53,7 @@ class ThumbcacheFile:
             return tmp_header
 
     @property
-    def header(self) -> Structure:
+    def header(self) -> c_thumbcache_index.CACHE_HEADER_VISTA | c_thumbcache_index.CACHE_HEADER:
         return self._header
 
     @property
@@ -134,7 +132,9 @@ class ThumbcacheEntry:
 
         self._data = fh.read(self._header.Size - header_size)
 
-    def _get_header(self, thumbnail_type: ThumbnailType) -> type[Structure]:
+    def _get_header(
+        self, thumbnail_type: ThumbnailType
+    ) -> type[c_thumbcache_index.CACHE_ENTRY_VISTA | c_thumbcache_index.CACHE_ENTRY]:
         if thumbnail_type == ThumbnailType.WINDOWS_VISTA:
             return c_thumbcache_index.CACHE_ENTRY_VISTA
         else:

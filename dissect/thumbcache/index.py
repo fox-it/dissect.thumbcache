@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import datetime
 from typing import BinaryIO, Iterator
 
-from dissect.cstruct import Structure
 from dissect.util import ts
 
 from dissect.thumbcache.c_thumbcache import c_thumbcache_index
@@ -30,12 +29,12 @@ class ThumbnailIndex:
         self._header = None
 
     @property
-    def header(self) -> Structure:
+    def header(self) -> c_thumbcache_index.INDEX_HEADER_V1 | c_thumbcache_index.INDEX_HEADER_V2:
         if self._header is None:
             self._header = self._find_header(self.fh)
         return self._header
 
-    def _find_header(self, fh: BinaryIO) -> Structure:
+    def _find_header(self, fh: BinaryIO) -> c_thumbcache_index.INDEX_HEADER_V1 | c_thumbcache_index.INDEX_HEADER_V2:
         """Searches for the header signature, and puts ``fh`` at the correct position.
 
         From Windows 8.1 onward, the two fields seem to use a 64-bit format field
@@ -118,12 +117,16 @@ class IndexEntry:
         self._data = None
 
     @property
-    def header(self) -> Structure:
+    def header(
+        self,
+    ) -> c_thumbcache_index.VISTA_ENTRY | c_thumbcache_index.WINDOWS7_ENTRY | c_thumbcache_index.WINDOWS8_ENTRY:
         if not self._header:
             self._header = self._select_header()
         return self._header
 
-    def _select_header(self) -> Structure:
+    def _select_header(
+        self,
+    ) -> c_thumbcache_index.VISTA_ENTRY | c_thumbcache_index.WINDOWS7_ENTRY | c_thumbcache_index.WINDOWS8_ENTRY:
         """Selects header version according to the thumbnailtype."""
         if self.type == ThumbnailType.WINDOWS_VISTA:
             return c_thumbcache_index.VISTA_ENTRY(self.fh)

@@ -25,8 +25,8 @@ classifiers = [
   "Topic :: Utilities",
 ]
 dependencies = [
-    "dissect.cstruct>=3.0.dev,<4.0.dev",
-    "dissect.util>=3.0.dev,<4.0.dev",
+    "dissect.cstruct>=4.0.dev,<5",
+    "dissect.util>=3,<4",
 ]
 dynamic = ["version"]
 
@@ -34,6 +34,12 @@ dynamic = ["version"]
 homepage = "https://dissect.tools"
 documentation = "https://docs.dissect.tools/en/latest/projects/dissect.thumbcache"
 repository = "https://github.com/fox-it/dissect.thumbcache"
+
+[project.optional-dependencies]
+dev = [
+    "dissect.cstruct>=4.0.dev,<5.0.dev",
+    "dissect.util>=3.0.dev,<4.0.dev",
+]
 
 [project.scripts]
 thumbcache-extract = "dissect.thumbcache.tools.extract_images:main"
