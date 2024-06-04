@@ -1,6 +1,6 @@
 from dissect.cstruct import cstruct
 
-c_thumbcache_index_def = """
+thumbcache_index_def = """
 struct INDEX_HEADER_V1 {
     char    Signature[4];   // 0x00
     uint32  Version;        // 0x04
@@ -75,5 +75,4 @@ struct CACHE_ENTRY_VISTA {
     uint32  Unknown;        // 0x28
 }; // 0x2C
 """
-c_thumbcache_index = cstruct()
-c_thumbcache_index.load(c_thumbcache_index_def)
+c_thumbcache_index = cstruct().load(thumbcache_index_def)
