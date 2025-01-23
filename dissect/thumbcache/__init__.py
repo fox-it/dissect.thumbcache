@@ -6,8 +6,8 @@ from dissect.thumbcache.thumbcache_file import ThumbcacheEntry, ThumbcacheFile
 __all__ = [
     "Error",
     "IndexEntry",
-    "ThumbnailIndex",
-    "ThumbcacheFile",
-    "ThumbcacheEntry",
     "Thumbcache",
+    "ThumbcacheEntry",
+    "ThumbcacheFile",
+    "ThumbnailIndex",
 ]

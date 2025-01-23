@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 
 import pytest
@@ -11,12 +13,12 @@ def thumbcache(path: str) -> Thumbcache:
     return Thumbcache(file)
 
 
-def test_thumbcache():
+def test_thumbcache() -> None:
     assert Thumbcache(Path(__file__).parent / "data/windows_7")
 
 
 @pytest.mark.parametrize(
-    "path, expected_mapping",
+    ("path", "expected_mapping"),
     [
         ("data/windows_vista", {0: "32", 1: "96", 2: "256", 3: "1024", 4: "sr"}),
         (
@@ -60,13 +62,13 @@ def test_thumbcache():
         ),
     ],
 )
-def test_thumbcache_mapping(thumbcache: Thumbcache, expected_mapping: dict):
+def test_thumbcache_mapping(thumbcache: Thumbcache, expected_mapping: dict) -> None:
     for key, value in expected_mapping.items():
         assert value in thumbcache.mapping[key].name
 
 
 @pytest.mark.parametrize(
-    "path, nr_of_entries",
+    ("path", "nr_of_entries"),
     [
         (
             "data/windows_7",
@@ -78,16 +80,16 @@ def test_thumbcache_mapping(thumbcache: Thumbcache, expected_mapping: dict):
         ),
     ],
 )
-def test_thumbcache_entries(thumbcache: Thumbcache, nr_of_entries: int):
+def test_thumbcache_entries(thumbcache: Thumbcache, nr_of_entries: int) -> None:
     assert len(list(thumbcache.entries())) == nr_of_entries
 
 
 @pytest.mark.parametrize(
-    "path, offsets, expected_entries",
+    ("path", "offsets", "expected_entries"),
     [
         ("data/windows_7", [0xFFFFFFFF, 0xFFFFFFFF, 152, 0xFFFFFFFF, 0xFFFFFFFF], 1),
         ("data/windows_7", [0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF], 0),
     ],
 )
-def test_entries_from_offset(thumbcache: Thumbcache, offsets, expected_entries):
+def test_entries_from_offset(thumbcache: Thumbcache, offsets: list[int], expected_entries: int) -> None:
     assert len(list(thumbcache._entries_from_offsets(offsets))) == expected_entries

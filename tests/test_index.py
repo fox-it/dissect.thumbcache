@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import io
 from pathlib import Path
 from unittest.mock import Mock
@@ -8,12 +10,12 @@ from dissect.thumbcache.exceptions import NotAnIndexFileError
 from dissect.thumbcache.index import IndexEntry, ThumbnailIndex, ThumbnailType
 
 
-def test_index():
+def test_index() -> None:
     ThumbnailIndex(fh=Mock)
 
 
 @pytest.mark.parametrize(
-    "path, expected_type",
+    ("path", "expected_type"),
     [
         (Path("data/windows_vista/thumbcache_idx.db"), ThumbnailType.WINDOWS_VISTA),
         (Path("data/windows_7/thumbcache_idx.db"), ThumbnailType.WINDOWS_7),
@@ -25,7 +27,7 @@ def test_index():
 def test_index_type(
     path: Path,
     expected_type: ThumbnailType,
-):
+) -> None:
     index_path = Path(__file__).parent / path
 
     with index_path.open("rb") as ifile:
@@ -33,13 +35,12 @@ def test_index_type(
         assert index.type == expected_type
 
 
-def test_index_unknown():
+def test_index_unknown() -> None:
     with pytest.raises(NotAnIndexFileError):
-        index = ThumbnailIndex(io.BytesIO(b"UNKNOWN_DATA"))
-        index.header
+        _ = ThumbnailIndex(io.BytesIO(b"UNKNOWN_DATA")).header
 
 
-def test_index_entry():
+def test_index_entry() -> None:
     index_entry = IndexEntry(io.BytesIO(b"\x00" * 20), ThumbnailType.WINDOWS_VISTA)
     assert not index_entry.in_use()
 
@@ -54,7 +55,7 @@ def test_index_entry():
         "data/windows_vista/thumbcache_idx.db",
     ],
 )
-def test_get_index_entries(path: str):
+def test_get_index_entries(path: str) -> None:
     idx_file = Path(__file__).parent / path
     with idx_file.open("rb") as index_file:
         index = ThumbnailIndex(index_file)

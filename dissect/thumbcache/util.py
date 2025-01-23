@@ -1,6 +1,11 @@
+from __future__ import annotations
+
 import enum
 from contextlib import contextmanager
-from typing import BinaryIO
+from typing import TYPE_CHECKING, BinaryIO
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class ThumbnailType(enum.IntEnum):
@@ -11,7 +16,7 @@ class ThumbnailType(enum.IntEnum):
 
 
 @contextmanager
-def seek_and_return(fh: BinaryIO, position: int) -> BinaryIO:
+def seek_and_return(fh: BinaryIO, position: int) -> Iterator[BinaryIO]:
     current_position = fh.tell()
     try:
         fh.seek(position)
