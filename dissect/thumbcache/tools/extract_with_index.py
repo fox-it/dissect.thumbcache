@@ -1,11 +1,16 @@
-from pathlib import Path
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from dissect.thumbcache.exceptions import Error
 from dissect.thumbcache.thumbcache import Thumbcache
 from dissect.thumbcache.tools.utils import create_argument_parser, write_entry
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
-def dump_entry_data_through_index(path: Path, output_dir: Path, prefix: str):
+
+def dump_entry_data_through_index(path: Path, output_dir: Path, prefix: str) -> None:
     cache = Thumbcache(path=path, prefix=prefix)
     try:
         for location_path, entry in cache.entries():
@@ -15,7 +20,7 @@ def dump_entry_data_through_index(path: Path, output_dir: Path, prefix: str):
         print(e)
 
 
-def main():
+def main() -> None:
     parser = create_argument_parser("extract indexed entries")
     parser.add_argument(
         "--prefix",

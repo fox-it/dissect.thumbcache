@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from dissect.cstruct import cstruct
 
-thumbcache_index_def = """
+thumbcache_def = """
 struct INDEX_HEADER_V1 {
     char    Signature[4];   // 0x00
     uint32  Version;        // 0x04
@@ -75,4 +77,4 @@ struct CACHE_ENTRY_VISTA {
     uint32  Unknown;        // 0x28
 }; // 0x2C
 """
-c_thumbcache_index = cstruct().load(thumbcache_index_def)
+c_thumbcache = cstruct().load(thumbcache_def)

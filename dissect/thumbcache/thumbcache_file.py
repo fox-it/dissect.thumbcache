@@ -1,27 +1,30 @@
 from __future__ import annotations
 
-from typing import Any, BinaryIO
+from typing import TYPE_CHECKING, Any, BinaryIO
 
-from dissect.thumbcache.c_thumbcache import c_thumbcache_index
+from dissect.thumbcache.c_thumbcache import c_thumbcache
 from dissect.thumbcache.exceptions import (
     InvalidSignatureError,
     UnknownThumbnailTypeError,
 )
 from dissect.thumbcache.util import ThumbnailType, seek_and_return
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
 UNKNOWN_BYTES = 8
 
 
 class ThumbcacheFile:
     __slots__ = [
-        "fh",
-        "_header",
-        "signature",
-        "type",
-        "size",
-        "offset",
-        "_entries",
         "_cached_entries",
+        "_entries",
+        "_header",
+        "fh",
+        "offset",
+        "signature",
+        "size",
+        "type",
     ]
 
     """
@@ -39,8 +42,8 @@ class ThumbcacheFile:
         self._header = self._get_header_type(self.fh)
         self._cached_entries: dict[int, ThumbcacheEntry] = {}
 
-    def _get_header_type(self, fh: BinaryIO) -> c_thumbcache_index.CACHE_HEADER_VISTA | c_thumbcache_index.CACHE_HEADER:
-        tmp_header = c_thumbcache_index.CACHE_HEADER(fh)
+    def _get_header_type(self, fh: BinaryIO) -> c_thumbcache.CACHE_HEADER_VISTA | c_thumbcache.CACHE_HEADER:
+        tmp_header = c_thumbcache.CACHE_HEADER(fh)
 
         if self._signature != tmp_header.Signature:
             raise InvalidSignatureError(
@@ -48,12 +51,11 @@ class ThumbcacheFile:
             )
 
         if tmp_header.Version <= ThumbnailType.WINDOWS_7:
-            return c_thumbcache_index.CACHE_HEADER_VISTA(tmp_header.dumps())
-        else:
-            return tmp_header
+            return c_thumbcache.CACHE_HEADER_VISTA(tmp_header.dumps())
+        return tmp_header
 
     @property
-    def header(self) -> c_thumbcache_index.CACHE_HEADER_VISTA | c_thumbcache_index.CACHE_HEADER:
+    def header(self) -> c_thumbcache.CACHE_HEADER_VISTA | c_thumbcache.CACHE_HEADER:
         return self._header
 
     @property
@@ -72,15 +74,15 @@ class ThumbcacheFile:
         self._cached_entries[key] = item
         return item
 
-    def __getattribute__(self, __name: str) -> Any:
+    def __getattribute__(self, name: str) -> Any:
         try:
-            return object.__getattribute__(self, __name)
+            return object.__getattribute__(self, name)
         except AttributeError:
             pass
 
-        return getattr(self.header, __name.capitalize())
+        return getattr(self.header, name.capitalize())
 
-    def entries(self) -> list[ThumbcacheEntry]:
+    def entries(self) -> Iterator[ThumbcacheEntry]:
         with seek_and_return(self.fh, self.fh.tell()):
             try:
                 while True:
@@ -123,10 +125,10 @@ class ThumbcacheEntry:
             fh.read(UNKNOWN_BYTES)
             additional_bytes += UNKNOWN_BYTES
 
-        self.data_checksum: bytes = c_thumbcache_index.char[8](fh)
-        self.header_checksum: bytes = c_thumbcache_index.char[8](fh)
+        self.data_checksum: bytes = c_thumbcache.char[8](fh)
+        self.header_checksum: bytes = c_thumbcache.char[8](fh)
 
-        self.identifier: str = c_thumbcache_index.wchar[self._header.IdentifierSize // 2](fh)
+        self.identifier: str = c_thumbcache.wchar[self._header.IdentifierSize // 2](fh)
 
         header_size = len(self._header) + self._header.IdentifierSize + additional_bytes
 
@@ -134,11 +136,10 @@ class ThumbcacheEntry:
 
     def _get_header(
         self, thumbnail_type: ThumbnailType
-    ) -> type[c_thumbcache_index.CACHE_ENTRY_VISTA | c_thumbcache_index.CACHE_ENTRY]:
+    ) -> type[c_thumbcache.CACHE_ENTRY_VISTA | c_thumbcache.CACHE_ENTRY]:
         if thumbnail_type == ThumbnailType.WINDOWS_VISTA:
-            return c_thumbcache_index.CACHE_ENTRY_VISTA
-        else:
-            return c_thumbcache_index.CACHE_ENTRY
+            return c_thumbcache.CACHE_ENTRY_VISTA
+        return c_thumbcache.CACHE_ENTRY
 
     @property
     def hash(self) -> str:

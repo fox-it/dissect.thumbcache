@@ -1,8 +1,13 @@
-from pathlib import Path
-from typing import Iterator
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from dissect.thumbcache.index import IndexEntry, ThumbnailIndex
 from dissect.thumbcache.thumbcache_file import ThumbcacheEntry, ThumbcacheFile
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from pathlib import Path
 
 
 class Thumbcache:
@@ -50,8 +55,7 @@ class Thumbcache:
     def index_entries(self) -> Iterator[IndexEntry]:
         """Iterates through all the index entries that are in use."""
         with self.index_file.open("rb") as i_file:
-            for entry in ThumbnailIndex(i_file).entries():
-                yield entry
+            yield from ThumbnailIndex(i_file).entries()
 
     def _entries_from_offsets(self, offsets: list[int]) -> Iterator[tuple[Path, ThumbcacheEntry]]:
         """Retrieves Thumbcache entries from a ThumbcacheFile using offsets."""

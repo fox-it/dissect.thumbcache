@@ -1,13 +1,17 @@
 #!/bin/python3
+from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from dissect.thumbcache.exceptions import Error
 from dissect.thumbcache.thumbcache_file import ThumbcacheFile
 from dissect.thumbcache.tools.utils import create_argument_parser, write_entry
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
-def dump_entry_data(path: Path, output_dir: Path):
+
+def dump_entry_data(path: Path, output_dir: Path) -> None:
     with path.open("rb") as file:
         try:
             cache_file = ThumbcacheFile(file)
@@ -18,7 +22,7 @@ def dump_entry_data(path: Path, output_dir: Path):
             print(e)
 
 
-def main():
+def main() -> None:
     parser = create_argument_parser("extract raw thumbcache entries")
     args = parser.parse_args()
     path: Path = args.cache_path

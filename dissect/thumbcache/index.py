@@ -1,13 +1,16 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import BinaryIO, Iterator
+from typing import TYPE_CHECKING, BinaryIO
 
 from dissect.util import ts
 
-from dissect.thumbcache.c_thumbcache import c_thumbcache_index
+from dissect.thumbcache.c_thumbcache import c_thumbcache
 from dissect.thumbcache.exceptions import NotAnIndexFileError
 from dissect.thumbcache.util import ThumbnailType
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from datetime import datetime
 
 INDEX_ENTRIES = {
     ThumbnailType.WINDOWS_7: 5,
@@ -29,12 +32,12 @@ class ThumbnailIndex:
         self._header = None
 
     @property
-    def header(self) -> c_thumbcache_index.INDEX_HEADER_V1 | c_thumbcache_index.INDEX_HEADER_V2:
+    def header(self) -> c_thumbcache.INDEX_HEADER_V1 | c_thumbcache.INDEX_HEADER_V2:
         if self._header is None:
             self._header = self._find_header(self.fh)
         return self._header
 
-    def _find_header(self, fh: BinaryIO) -> c_thumbcache_index.INDEX_HEADER_V1 | c_thumbcache_index.INDEX_HEADER_V2:
+    def _find_header(self, fh: BinaryIO) -> c_thumbcache.INDEX_HEADER_V1 | c_thumbcache.INDEX_HEADER_V2:
         """Searches for the header signature, and puts ``fh`` at the correct position.
 
         From Windows 8.1 onward, the two fields seem to use a 64-bit format field
@@ -44,19 +47,19 @@ class ThumbnailIndex:
             fh: The file to read the header and indexes from.
 
         Returns:
-            A c_thumbcache_index.INDEX_HEADER structure.
+            A c_thumbcache.INDEX_HEADER structure.
 
         Raises:
             NotAThumbnailIndexFileError: If the ``IMMM`` signature could not be found.
         """
         position = fh.tell()
-        buffer = fh.read(len(c_thumbcache_index.INDEX_HEADER_V1))
+        buffer = fh.read(len(c_thumbcache.INDEX_HEADER_V1))
         offset = buffer.find(self._signature)
 
         if offset == MAX_IMM_OFFSET:
             fh.seek(position)
 
-            header = c_thumbcache_index.INDEX_HEADER_V2(fh)
+            header = c_thumbcache.INDEX_HEADER_V2(fh)
             # From looking at the index files, it has a specific amount of information.
             # It is alligned in the follwing way:
             #   INDEX_HEADER_V2
@@ -68,19 +71,18 @@ class ThumbnailIndex:
 
             # Read one index entry from the file till only zero bytes
             entry = IndexEntry(fh, header.Version)
-            entry.header
-            entry.cache_offsets
+            _ = entry.header
+            _ = entry.cache_offsets
 
             # Read offset to first entry
             zero_bytes = len(entry.header) + INDEX_ENTRIES.get(header.Version) * BYTES_IN_NUMBER - len(header)
             fh.read(zero_bytes)
             return header
-        elif offset == 0:
-            return c_thumbcache_index.INDEX_HEADER_V1(buffer)
-        else:
-            raise NotAnIndexFileError(
-                f"The index file signature {self._signature!r} could not be found at the expected location."
-            )
+        if offset == 0:
+            return c_thumbcache.INDEX_HEADER_V1(buffer)
+        raise NotAnIndexFileError(
+            f"The index file signature {self._signature!r} could not be found at the expected location."
+        )
 
     @property
     def version(self) -> int:
@@ -102,8 +104,8 @@ class ThumbnailIndex:
         """Returns all index entries that are actually used."""
         for _ in range(self.total_entries):
             entry = IndexEntry(self.fh, self.type)
-            entry.header
-            entry.cache_offsets
+            _ = entry.header
+            _ = entry.cache_offsets
 
             if entry.in_use():
                 yield entry
@@ -119,21 +121,20 @@ class IndexEntry:
     @property
     def header(
         self,
-    ) -> c_thumbcache_index.VISTA_ENTRY | c_thumbcache_index.WINDOWS7_ENTRY | c_thumbcache_index.WINDOWS8_ENTRY:
+    ) -> c_thumbcache.VISTA_ENTRY | c_thumbcache.WINDOWS7_ENTRY | c_thumbcache.WINDOWS8_ENTRY:
         if not self._header:
             self._header = self._select_header()
         return self._header
 
     def _select_header(
         self,
-    ) -> c_thumbcache_index.VISTA_ENTRY | c_thumbcache_index.WINDOWS7_ENTRY | c_thumbcache_index.WINDOWS8_ENTRY:
+    ) -> c_thumbcache.VISTA_ENTRY | c_thumbcache.WINDOWS7_ENTRY | c_thumbcache.WINDOWS8_ENTRY:
         """Selects header version according to the thumbnailtype."""
         if self.type == ThumbnailType.WINDOWS_VISTA:
-            return c_thumbcache_index.VISTA_ENTRY(self.fh)
-        elif self.type == ThumbnailType.WINDOWS_7:
-            return c_thumbcache_index.WINDOWS7_ENTRY(self.fh)
-        else:
-            return c_thumbcache_index.WINDOWS8_ENTRY(self.fh)
+            return c_thumbcache.VISTA_ENTRY(self.fh)
+        if self.type == ThumbnailType.WINDOWS_7:
+            return c_thumbcache.WINDOWS7_ENTRY(self.fh)
+        return c_thumbcache.WINDOWS8_ENTRY(self.fh)
 
     def in_use(self) -> bool:
         return self.identifier != b"\x00" * IDENTIFIER_BYTES
@@ -156,7 +157,7 @@ class IndexEntry:
         """
         if not self._data:
             size = INDEX_ENTRIES.get(self.type)
-            self._data = c_thumbcache_index.uint32[size](self.fh)
+            self._data = c_thumbcache.uint32[size](self.fh)
             if self.type > ThumbnailType.WINDOWS_7:
                 # Alignment step
                 self.fh.read((size % 2) * BYTES_IN_NUMBER)
