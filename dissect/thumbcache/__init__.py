@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dissect.thumbcache.exceptions import Error
 from dissect.thumbcache.index import IndexEntry, ThumbnailIndex
 from dissect.thumbcache.thumbcache import Thumbcache

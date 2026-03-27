@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from dissect.thumbcache.index import IndexEntry, ThumbnailIndex
-from dissect.thumbcache.thumbcache_file import ThumbcacheEntry, ThumbcacheFile
+from dissect.thumbcache.index import ThumbnailIndex
+from dissect.thumbcache.thumbcache_file import ThumbcacheFile
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
+
+    from dissect.thumbcache.index import IndexEntry
+    from dissect.thumbcache.thumbcache_file import ThumbcacheEntry
 
 
 class Thumbcache:
