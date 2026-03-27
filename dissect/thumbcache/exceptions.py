@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 class Error(Exception):
     """A generic exception for the thumbcache module."""
 
